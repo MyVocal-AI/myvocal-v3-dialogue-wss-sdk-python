@@ -1,0 +1,25 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "myvocal-v3-dialogue-wss"
+version = "1.0.1"
+description = "MyVocal V3 dialogue multi-context WebSocket SDK"
+readme = "README.md"
+license = "Apache-2.0"
+license-files = ["LICENSE", "NOTICE"]
+requires-python = ">=3.9"
+dependencies = ["websockets>=12,<16"]
+
+[project.optional-dependencies]
+test = ["pytest>=7", "pytest-asyncio>=0.23"]
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+pythonpath = ["src"]
+asyncio_mode = "auto"
+testpaths = ["tests"]
+markers = ["live: real API test requiring process-only credentials"]

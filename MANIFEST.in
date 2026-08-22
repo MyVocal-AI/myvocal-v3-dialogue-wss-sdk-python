@@ -1,0 +1,6 @@
+include LICENSE
+include NOTICE
+include README.md
+recursive-include examples *.py
+recursive-include test-vectors *.json
+recursive-include tests *.py

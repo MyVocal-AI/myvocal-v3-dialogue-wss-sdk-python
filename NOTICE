@@ -1,0 +1,12 @@
+MyVocal V3 Dialogue Multi-Context WebSocket SDKs
+Copyright 2026 MyVocal AI
+
+Licensed under the Apache License, Version 2.0.
+
+Runtime dependency:
+
+- websockets 12.x-15.x, BSD 3-Clause License
+  https://github.com/python-websockets/websockets
+
+Test-only components include pytest and pytest-asyncio. Their license terms
+remain available from their respective projects and package metadata.
