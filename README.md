@@ -1,13 +1,29 @@
-# MyVocal V3 Dialogue WebSocket SDK for Python
+# MyVocal Dialogue WebSocket SDK for Python
 
-Async Python 3.9+ client for multi-context V3 dialogue synthesis.
+Async Python 3.9+ client for multi-context dialogue synthesis.
+
+## Model Selection (v1.1.0)
+
+Supports `myvocal_v3` (default), `myvocal_v4`, and `myvocal_v3_turbo`.
+Package names and import paths retain `v3` for compatibility.
+
+```python
+options = ConnectionOptions(model_id="myvocal_v4")
+# Or: ConnectionOptions(model_id="myvocal_v3_turbo")
+```
+
+These models use the **dialogue Multi-Context** endpoint. The two new models
+do not support ordinary TTS Single or ordinary TTS Multi-Context WebSocket.
+Model IDs are sent unchanged; the SDK does not maintain a model whitelist.
+Available SDK options are not a promise that every model supports every
+advanced option or format. Start with `mp3_128` and default options.
 
 ## Local Installation
 
 From the extracted ZIP:
 
 ```bash
-python -m pip install dist/myvocal_v3_dialogue_wss-1.0.1-py3-none-any.whl
+python -m pip install dist/myvocal_v3_dialogue_wss-1.1.0-py3-none-any.whl
 ```
 
 The package is not yet published to PyPI.
@@ -76,8 +92,12 @@ take priority during an event storm. Callback exceptions are reported as
 A server error with a registered `context_id` terminates only that context.
 Connection-level errors remain sticky and are returned by later close calls.
 
-Successfully generated text is charged at twice the standard TTS character
-usage.
+Usage is reported by `GET https://api.voicelibrary.co/enterprise/v1/user/usage`.
+`myvocal_v3`, `myvocal_v4`, and `myvocal_v3_turbo` record characters under
+`tts.v3_chars`, `tts.v4_chars`, and `tts.v3_turbo_chars`, respectively,
+and contribute to `tts.total_chars`. Use the returned counters to reconcile
+usage; no SDK-side multiplier is applied. New-model counters describe new
+requests, not a historical backfill.
 
 ## Verification
 
@@ -87,3 +107,5 @@ python -m pytest -q
 
 The live test is skipped unless `MYVOCAL_TTS_API_KEY` and
 `MYVOCAL_VOICE_ID` are present in the current process.
+
+The packaged basic example also accepts optional `MYVOCAL_MODEL_ID`.

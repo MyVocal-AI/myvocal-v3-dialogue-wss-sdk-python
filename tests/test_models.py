@@ -22,6 +22,20 @@ VECTORS = json.loads(
 )
 
 
+@pytest.mark.parametrize("model", ["myvocal_v3", "myvocal_v4", "myvocal_v3_turbo", "future/model +1"])
+def test_model_selection_is_encoded_once_without_whitelist(model):
+    query = parse_qs(urlparse(ConnectionOptions(model_id=model).build_url()).query)
+    assert query["model_id"] == [model]
+    assert query["priority"] == ["dedicated_concurrency"]
+
+
+def test_existing_positional_constructor_keeps_default_model():
+    options = ConnectionOptions("mp3_128", "en", False, "on", None, True,
+                                "wss://example.invalid/multi", 12.0)
+    assert options.connect_timeout == 12.0
+    assert parse_qs(urlparse(options.build_url()).query)["model_id"] == ["myvocal_v3"]
+
+
 def test_url_contains_fixed_query_and_defaults():
     url = ConnectionOptions().build_url()
     query = parse_qs(urlparse(url).query)

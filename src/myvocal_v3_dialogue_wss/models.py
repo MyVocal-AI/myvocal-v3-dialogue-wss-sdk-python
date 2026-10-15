@@ -34,6 +34,7 @@ class ConnectionOptions:
     enable_logging: bool = True
     endpoint: str = ENDPOINT
     connect_timeout: float = 30.0
+    model_id: str = "myvocal_v3"
 
     def __post_init__(self):
         if self.format not in FORMATS:
@@ -63,7 +64,7 @@ class ConnectionOptions:
     def build_url(self):
         query = {
             "priority": "dedicated_concurrency",
-            "model_id": "myvocal_v3",
+            "model_id": self.model_id,
             "format": self.format,
             "timestamps": str(self.timestamps).lower(),
             "text_normalization": self.text_normalization,

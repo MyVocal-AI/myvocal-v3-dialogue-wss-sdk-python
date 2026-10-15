@@ -23,6 +23,7 @@ async def main():
     client = MultiContextClient(
         api_key,
         ConnectionOptions(
+            model_id=os.environ.get("MYVOCAL_MODEL_ID", "myvocal_v3"),
             format="mp3_128",
             language_code="en",
             timestamps=True,
