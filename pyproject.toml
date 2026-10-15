@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "myvocal-v3-dialogue-wss"
-version = "1.1.1"
+version = "1.1.2"
 description = "MyVocal V3 dialogue multi-context WebSocket SDK"
 readme = "README.md"
 license = "Apache-2.0"

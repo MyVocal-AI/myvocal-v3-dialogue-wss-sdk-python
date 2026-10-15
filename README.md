@@ -4,10 +4,10 @@ Async Python client for multi-role dialogue synthesis. Requires Python 3.9 or la
 
 ## Install
 
-Download and extract [SDK v1.1.1](https://github.com/MyVocal-AI/myvocal-v3-dialogue-wss-sdk-python/releases/tag/v1.1.1), then run from the extracted folder:
+Download and extract [SDK v1.1.2](https://github.com/MyVocal-AI/myvocal-v3-dialogue-wss-sdk-python/releases/tag/v1.1.2), then run from the extracted folder:
 
 ```bash
-python -m pip install dist/myvocal_v3_dialogue_wss-1.1.1-py3-none-any.whl
+python -m pip install dist/myvocal_v3_dialogue_wss-1.1.2-py3-none-any.whl
 ```
 
 The wheel installs the required `websockets` dependency. Use the supplied wheel; this package is not available on PyPI.
@@ -23,6 +23,16 @@ from myvocal_v3_dialogue_wss import ConnectionOptions
 options = ConnectionOptions(model_id="myvocal_v4", format="mp3_128")
 # Or model_id="myvocal_v3_turbo"
 ```
+
+## Output languages
+
+`myvocal_v4` and `myvocal_v3_turbo` support the same 94 output languages. Use `zh` for Mandarin Chinese and `yue` for Cantonese. See the [language list](https://api-docs.myvocal.ai/64249845f0#输出语言) for all supported codes.
+
+```python
+options = ConnectionOptions(model_id="myvocal_v4", language_code="yue")
+```
+
+Omit the language option to select a language from the input text. Provide text in the desired language; the option does not translate it.
 
 ## Run the example
 

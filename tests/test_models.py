@@ -77,6 +77,21 @@ def test_language_is_lowercased_and_invalid_language_is_rejected():
         ConnectionOptions(language_code="éñ")
 
 
+@pytest.mark.parametrize("model", ["myvocal_v3", "myvocal_v4", "myvocal_v3_turbo"])
+@pytest.mark.parametrize("code", ["en", "zh", "ast", "yue", "ceb", "fil", "ckb", "kam"])
+def test_supported_language_codes_reach_the_connection_query(model, code):
+    options = ConnectionOptions(model_id=model, language_code=code.upper())
+    query = parse_qs(urlparse(options.build_url()).query)
+    assert query["language_code"] == [code]
+    assert query["model_id"] == [model]
+
+
+@pytest.mark.parametrize("code", ["e", "engl", "en-US", "a1", " yue", "粤语", ""])
+def test_language_code_format_remains_validated(code):
+    with pytest.raises(ValidationError):
+        ConnectionOptions(language_code=code)
+
+
 @pytest.mark.parametrize("stability", VECTORS["stability"]["valid"])
 def test_valid_stability(stability):
     assert VoiceSettings(stability=stability).to_wire() == {

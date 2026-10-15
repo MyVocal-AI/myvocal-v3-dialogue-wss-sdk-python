@@ -42,11 +42,11 @@ class ConnectionOptions:
         if self.language_code is not None:
             if (
                 not isinstance(self.language_code, str)
-                or len(self.language_code) != 2
+                or len(self.language_code) not in (2, 3)
                 or not self.language_code.isascii()
                 or not self.language_code.isalpha()
             ):
-                raise ValidationError("language_code must be ISO 639-1")
+                raise ValidationError("language_code must contain 2 or 3 ASCII letters")
             self.language_code = self.language_code.lower()
         if self.text_normalization not in NORMALIZATION_MODES:
             raise ValidationError("unsupported text_normalization")
