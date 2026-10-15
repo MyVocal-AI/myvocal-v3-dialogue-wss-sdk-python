@@ -1,110 +1,87 @@
 # MyVocal Dialogue WebSocket SDK for Python
 
-Async Python 3.9+ client for multi-context dialogue synthesis.
+Async Python client for multi-role dialogue synthesis. Requires Python 3.9 or later and an enterprise TTS API Key with dedicated concurrency.
 
-## Model Selection (v1.1.0)
+## Install
 
-Supports `myvocal_v3` (default), `myvocal_v4`, and `myvocal_v3_turbo`.
-Package names and import paths retain `v3` for compatibility.
-
-```python
-options = ConnectionOptions(model_id="myvocal_v4")
-# Or: ConnectionOptions(model_id="myvocal_v3_turbo")
-```
-
-These models use the **dialogue Multi-Context** endpoint. The two new models
-do not support ordinary TTS Single or ordinary TTS Multi-Context WebSocket.
-Model IDs are sent unchanged; the SDK does not maintain a model whitelist.
-Available SDK options are not a promise that every model supports every
-advanced option or format. Start with `mp3_128` and default options.
-
-## Local Installation
-
-From the extracted ZIP:
+Download and extract [SDK v1.1.1](https://github.com/MyVocal-AI/myvocal-v3-dialogue-wss-sdk-python/releases/tag/v1.1.1), then run from the extracted folder:
 
 ```bash
-python -m pip install dist/myvocal_v3_dialogue_wss-1.1.0-py3-none-any.whl
+python -m pip install dist/myvocal_v3_dialogue_wss-1.1.1-py3-none-any.whl
 ```
 
-The package is not yet published to PyPI.
+The wheel installs the required `websockets` dependency. Use the supplied wheel; this package is not available on PyPI.
 
-## Quick Start
+## Choose a model
+
+Supported models: `myvocal_v3` (default), `myvocal_v4`, and `myvocal_v3_turbo`.
+Use these SDKs with the dialogue Multi-Context WebSocket endpoint. `myvocal_v4` and `myvocal_v3_turbo` do not support ordinary TTS WebSocket endpoints.
+
+```python
+from myvocal_v3_dialogue_wss import ConnectionOptions
+
+options = ConnectionOptions(model_id="myvocal_v4", format="mp3_128")
+# Or model_id="myvocal_v3_turbo"
+```
+
+## Run the example
+
+Set the following environment variables before running the example:
+
+```bash
+export MYVOCAL_TTS_API_KEY='YOUR_API_KEY'
+export MYVOCAL_VOICE_ID='YOUR_VOICE_ID'
+export MYVOCAL_MODEL_ID='myvocal_v4'
+```
+
+PowerShell:
+
+```powershell
+$env:MYVOCAL_TTS_API_KEY='YOUR_API_KEY'
+$env:MYVOCAL_VOICE_ID='YOUR_VOICE_ID'
+$env:MYVOCAL_MODEL_ID='myvocal_v4'
+```
+
+`MYVOCAL_MODEL_ID` is optional; the default is `myvocal_v3`. Running the example makes a real synthesis request and consumes character usage. It prints audio byte counts and the connection close code.
+
+```bash
+python examples/basic.py
+```
+
+## Quick start
 
 ```python
 import asyncio
 import os
-
 from myvocal_v3_dialogue_wss import (
-    ConnectionOptions,
-    ContextOptions,
-    Input,
-    MultiContextClient,
-    VoiceSettings,
+    ConnectionOptions, ContextOptions, Input, MultiContextClient,
 )
 
-
 async def main():
-    key = os.environ["MYVOCAL_TTS_API_KEY"]
     voice = os.environ["MYVOCAL_VOICE_ID"]
-    client = MultiContextClient(key, ConnectionOptions(format="mp3_128"))
-    client.on_audio = lambda context_id, audio, alignment: print(
-        context_id, len(audio)
+    client = MultiContextClient(
+        os.environ["MYVOCAL_TTS_API_KEY"],
+        ConnectionOptions(model_id="myvocal_v4"),
     )
-
+    client.on_audio = lambda context_id, audio, alignment: print(context_id, len(audio))
     await client.connect()
-    await client.open_context(
-        ContextOptions(
-            "scene-1",
-            [voice],
-            VoiceSettings(0.5),
-            [Input("Hello from MyVocal.", voice, True)],
-        )
-    )
+    await client.open_context(ContextOptions(
+        context_id="scene-1",
+        voices=[voice],
+        inputs=[Input("Hello from MyVocal.", voice, True)],
+    ))
     result = await client.close_socket(timeout=60)
     print(result.close_code)
-
 
 asyncio.run(main())
 ```
 
-## Options
+## Use the SDK in your application
 
-- `format`: `mp3_64`, `mp3_96`, `mp3_128`, `mp3_192`, `pcm_8000`,
-  `pcm_16000`, `pcm_22050`, `pcm_24000`, `pcm_44100`, `ulaw_8000`
-- `language_code`: optional two-letter language code
-- `timestamps`: enables alignment data
-- `text_normalization`: `auto`, `on`, or `off`
-- `seed`: optional integer from `1` to `4294967295`
-- `enable_logging`: request-side service logging option
+- [Usage guide](USAGE.md): connection options, contexts, audio callbacks, completion, errors, and timeouts.
+- [API reference](https://api-docs.myvocal.ai/3892090w0): messages, model support, and limits.
+- [Character usage](https://api-docs.myvocal.ai/336818975e0).
 
-Use `keep_alive(context_id)` before a context reaches its 20-second
-application idle timeout. WebSocket ping/pong does not replace this message.
+Keep callbacks short and handle audio separately for each context. Wait for context final events and Close Code `1000` when finishing the connection. The SDK does not automatically reconnect or replay text.
 
-`close_context()` waits for that context's `is_final`. `close_socket()` waits
-for all active contexts to become final and for Close Code `1000`. The SDK does
-not reconnect or replay text automatically.
-
-Audio callbacks run directly on the reader and must return quickly. Control
-and lifecycle callbacks use a 16-slot non-blocking queue; lifecycle callbacks
-take priority during an event storm. Callback exceptions are reported as
-`CallbackError` without changing a successful protocol result.
-
-A server error with a registered `context_id` terminates only that context.
-Connection-level errors remain sticky and are returned by later close calls.
-
-Usage is reported by `GET https://api.voicelibrary.co/enterprise/v1/user/usage`.
-`myvocal_v3`, `myvocal_v4`, and `myvocal_v3_turbo` record characters under
-`tts.v3_chars`, `tts.v4_chars`, and `tts.v3_turbo_chars`, respectively,
-and contribute to `tts.total_chars`. For usage details, see
-[Query primary key usage](https://api-docs.myvocal.ai/336818975e0).
-
-## Verification
-
-```bash
-python -m pytest -q
-```
-
-The live test is skipped unless `MYVOCAL_TTS_API_KEY` and
-`MYVOCAL_VOICE_ID` are present in the current process.
-
-The packaged basic example also accepts optional `MYVOCAL_MODEL_ID`.
+Licensed under [Apache License 2.0](LICENSE). Dependency notices are in [NOTICE](NOTICE).

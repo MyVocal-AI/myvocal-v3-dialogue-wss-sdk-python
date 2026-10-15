@@ -1,6 +1,9 @@
 include LICENSE
 include NOTICE
 include README.md
+include USAGE.md
+include CONTRACT.md
+include sdk-contract.json
 recursive-include examples *.py
-recursive-include test-vectors *.json
-recursive-include tests *.py
+prune tests
+prune test-vectors
